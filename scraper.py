@@ -15,7 +15,41 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+        # base case:
+    # if URL is not valid, resp.status is not 200, or content is empty --> return empty list
+    if not is_valid(resp.url) or resp.status != 200 or len(resp.raw_response.content) == 0:
+        return list()
+
+    result = []    # list to be returned
+    it = resp.raw_response.content[0]
+    content = resp.raw_response.content
+    # while(True):
+    #       extract hyperlink from resp.raw_response.content:
+    #       starting from it, find 'http'
+    #       extract characters until space or newline is found
+    #   if link is not valid, skip it
+    #   if link is already in results, skip it
+    #   add to result[]
+    while True:
+        if it == content.end:               # break if iterator points to end of content
+            break
+        index = content.find('http', it)    # starting from iterator position, find 'http'
+        if index == -1:                     # break if 'http' doesn't exist in remainder of content
+            break
+        it = content[index]                 # set iterator to current position in content
+        curr_str_list = []
+        while index < len(content) and content[index] != ' ' and content[index] != '\n':
+            curr_str_list.append(content[index])
+            index += 1
+        curr_str = curr_str_list.join('')
+        if not is_valid(curr_str):
+            it = content[index]
+            continue
+        if curr_str not in result:
+            result.append(curr_str)
+
+    return result
+
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
