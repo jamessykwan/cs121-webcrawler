@@ -33,9 +33,12 @@ def extract_next_links(url, resp):
         return links_grabbed
 
     
-
-    str_content = resp.raw_response.content.decode("utf-8",errors="?") #decode using utf-8
-
+    str_content =[]
+    try:
+        str_content = resp.raw_response.content.decode("utf-8",errors="?") #decode using utf-8
+    except:
+        print("Error ",resp.raw_response.url)
+        return links_grabbed
     
     soup = BeautifulSoup(str_content)
     for tag in soup.findAll('a', href=True):
@@ -93,14 +96,6 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-
-        if (".ics.uci.edu" not in parsed.netloc and 
-            ".cs.uci.edu" not in parsed.netloc and 
-            ".stat.uci.edu" not in parsed.netloc and 
-            ".informatics.uci.edu" not in parsed.netloc and
-             "today.uci.edu/department/information_computer_sciences" not in parsed.netloc):
-            return False
-            
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
