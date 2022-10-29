@@ -43,8 +43,9 @@ def extract_next_links(url, resp):
     soup = BeautifulSoup(str_content)
     for tag in soup.findAll('a', href=True):
         url = tag['href']
-        fragmentStart = url.index("#") #finds the fragments and gets rid of them
-        url = url[:fragmentStart]
+        if "#" in url:
+            fragmentStart = url.index("#") #finds the fragments and gets rid of them
+            url = url[:fragmentStart]
         if is_valid(url) and correct_path(url) and url not in links_grabbed: 
             links_grabbed.append(url)
     print(f"number of url: {len(links_grabbed)}")
