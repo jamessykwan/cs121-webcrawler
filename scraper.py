@@ -54,42 +54,50 @@ def extract_next_links(url, resp):
     except:
         print("Error ", resp.raw_response.url)
         return links_grabbed
-
+    
     soup = BeautifulSoup(str_content)
     for tag in soup.findAll('a', href=True):
         curr_url = tag['href']
-        fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
-        curr_url = curr_url[:fragmentStart]
+        if curr_url.startswith('/'): #if it expects us to append the domain to the link
+            if "today.uci.edu/department/information_computer_sciences/" in url:
+                domain = url[:url.index("today.uci.edu/department/information_computer_sciences/")+54]
+                curr_url = domain + curr_url
+            else:
+                domain = url[:url.index(".uci.edu/")+8]
+                curr_url = domain+ curr_url
+        if "#" in curr_url:
+            fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
+            curr_url = curr_url[:fragmentStart]
         if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
             links_grabbed.append(curr_url)
     print(f"number of url: {len(links_grabbed)}")
     return links_grabbed
-
+    
 '''
 old fashion way, work, but still have some issue
 '''
 # result = []
-# while True:
-#     if cur_index == size-1:               # break if iterator points to end of content
-#         break
-#     index = str_content.find('http', cur_index)    # starting from iterator position, find 'http'
-#     if index == -1:                     # break if 'http' doesn't exist in remainder of content
-#         break
+    # while True:
+    #     if cur_index == size-1:               # break if iterator points to end of content
+    #         break
+    #     index = str_content.find('http', cur_index)    # starting from iterator position, find 'http'
+    #     if index == -1:                     # break if 'http' doesn't exist in remainder of content
+    #         break
 
-#     curr_str_list = []
+    #     curr_str_list = []
 #     while index < size and str_content[index] not in [" ","\n", "\"","'"]: #check for the end of url string
-#         if not str_content[index] == "\\":
-#             curr_str_list.append(str_content[index])
-#         index += 1
-#     curr_str = "".join(curr_str_list)
-#     cur_index += len(curr_str)
+    #         if not str_content[index] == "\\":
+    #             curr_str_list.append(str_content[index])
+    #         index += 1
+    #     curr_str = "".join(curr_str_list)
+    #     cur_index += len(curr_str)
 
-#     if is_valid(curr_str) and curr_str not in result: #make sure this url is not duplicated and is valid
-#         result.append(curr_str)
-# return result
+    #     if is_valid(curr_str) and curr_str not in result: #make sure this url is not duplicated and is valid
+    #         result.append(curr_str)
+    # return result
 
 def is_valid(url):
-    # Decide whether to crawl this url or not.
+    # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
@@ -107,7 +115,7 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
     except TypeError:
-        print("TypeError for ", parsed)
+        print ("TypeError for ", parsed)
         raise
 
 
