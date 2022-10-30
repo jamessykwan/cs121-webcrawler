@@ -60,10 +60,10 @@ def extract_next_links(url, resp):
         curr_url = tag['href']
         if curr_url.startswith('/') and not curr_url.startswith("//"): #if it expects us to append the domain to the link
             if "today.uci.edu/department/information_computer_sciences/" in url:
-                domain = url[:url.index("today.uci.edu/department/information_computer_sciences/")+54]
+                domain = url[:url.index("today.uci.edu/department/information_computer_sciences")+54]
                 curr_url = domain + curr_url
             else:
-                domain = url[:url.index(".uci.edu/")+8]
+                domain = url[:url.index(".uci.edu")+8]
                 curr_url = domain+ curr_url
         if "#" in curr_url:
             fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
