@@ -58,7 +58,7 @@ def extract_next_links(url, resp):
     soup = BeautifulSoup(str_content)
     for tag in soup.findAll('a', href=True):
         curr_url = tag['href']
-        if curr_url.startswith('/'): #if it expects us to append the domain to the link
+        if curr_url.startswith('/') and not curr_url.startswith("//"): #if it expects us to append the domain to the link
             if "today.uci.edu/department/information_computer_sciences/" in url:
                 domain = url[:url.index("today.uci.edu/department/information_computer_sciences/")+54]
                 curr_url = domain + curr_url
