@@ -107,15 +107,15 @@ def is_valid(url):
         #traps checking
         # url.endswith("Avscode.jpg&ns=") or url.endswith("Avscode.jpg") or url.endswith("3Ajupyterhub")
         if url.startswith("https://wics.ics.uci.edu/events/20") or url.endswith("?share=facebook") or url.endswith("?share=twitter") or url.endswith("?action=login")\
-        or url.endswith(".zip") or url.endswith(".pdf")or url.endswith("txt"):
+        or url.endswith(".zip") or url.endswith(".pdf")or url.endswith("txt") or url.endswith("tar.gz") or url.endswith(".bib") or url.endswith(".htm"):
             return False
         elif ("wics" in url and "/?afg" in url and not (url.endswith("page_id=1"))) or ("wics" in url and "/img_" in url):
             return False
         elif "doku.php" in url: #trying to make parsing this particular website and its traps faster
             if "?" in url:
                 return False
-        elif "grape.ics.uci.edu" in url and "action=diff&version=" in url:
-            return False
+        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url):
+            return False #maybe not a trap, but is low information, do we crawl?
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
