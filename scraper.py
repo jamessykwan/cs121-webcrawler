@@ -23,25 +23,46 @@ def correct_path(url):
     return False
 
 
-def simhash(soup):  # calculate sim hash of current page based on soup
+
+def simhash(soup):                                  # calculate sim hash of current page based on soup
+    if len(soup) == 0:                              # return if soup empty
+        return
     contents = ''
-    for i in soup:  # combine contents of all tags in soup into one string
+
+    for i in soup:                                  # combine contents of all tags in soup into one string
         contents += i.content
         contents += ' '
-    tokens = word_tokenize(contents)  # tokenize words in contents
-    stopWords = set(stopwords.words('english'))     # download list of stopwords
-    for i in tokens:    # remove stopwords from list of tokens
-        if i in stopWords:
-            tokens.remove(i)
-    freqs = computeWordFrequencies(tokens)  # calculate frequencies of tokens
-    words = list(freqs.keys())          # extract words(keys) from freqs
-    weights = list(freqs.values())      # extract values from freqs to use as weights
-    for i in range(0, len(words)):      # hash each word using md5
-        words[i] = hashlib.md5(i.encode())
 
-    # initialize vector to and update its components based on the weights in freqs[]
-    # generate fingerprint based on vector
-    # store fingerprint in simhash_vals
+    tokens = word_tokenize(contents)                # tokenize words in contents
+    stop_words = set(stopwords.words('english'))    # download list of stopwords
+
+    for i in tokens:                                # remove stopwords from list of tokens
+        if i in stop_words:
+            tokens.remove(i)
+
+    freqs = computeWordFrequencies(tokens)          # calculate frequencies of tokens
+    words = list(freqs.keys())                      # extract words(keys) from freqs
+    weights = list(freqs.values())                  # extract values from freqs to use as weights
+
+    for i in range(0, len(words)):                  # hash each word using md5
+        temp = hashlib.md5(words[i].encode())       # encode word
+        temp = temp.hexdigest()                     # convert to hex
+        words[i] = bin(int(temp, 16)).zfill(8)      # convert to binary
+
+    fingerprint = []
+    for i in range(0, len(words[0])):               # fill fingerprint with 0s
+        fingerprint.append(0)
+
+    for i in range(0, len(words[0])):               # update vector components based on words & weights
+        for j in range(0, len(words)):
+            fingerprint[i] = fingerprint[i] + weights[j] if words[j][i] == 1 else fingerprint[i] - weights[j]
+
+    for i in range(0, len(fingerprint)):            # generate final fingerprint
+        if fingerprint[i] > 0:                      # set positive values to 1
+            fingerprint[i] = 1
+        else:                                       # set negative values to 0
+            fingerprint[i] = 0
+    simhash_vals.append(fingerprint)                # store fingerprint in simhash_vals
 
 
 def extract_next_links(url, resp):
