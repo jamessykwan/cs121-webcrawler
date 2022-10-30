@@ -23,7 +23,6 @@ def correct_path(url):
     return False
 
 
-
 def simhash(soup):                                  # calculate sim hash of current page based on soup
     if len(soup) == 0:                              # return if soup empty
         return
@@ -62,7 +61,6 @@ def simhash(soup):                                  # calculate sim hash of curr
             fingerprint[i] = 1
         else:                                       # set negative values to 0
             fingerprint[i] = 0
-    simhash_vals.append(fingerprint)                # store fingerprint in simhash_vals
 
 
 def extract_next_links(url, resp):
@@ -90,6 +88,11 @@ def extract_next_links(url, resp):
         return links_grabbed
 
     soup = BeautifulSoup(str_content)
+    fingerprint = simhash(soup)             # call simhash function to generate fingerprint of current page
+    if fingerprint not in simhash_vals:     # if fingerprint not in simhash_vals, add it
+        simhash_vals.append(fingerprint)
+    else:                                   # if fingerprint already in simhash_vals, is a (near) duplicate
+        return links_grabbed
     for tag in soup.findAll('a', href=True):
         curr_url = tag['href']
         if curr_url.startswith('/') and not curr_url.startswith(
