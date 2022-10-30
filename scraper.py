@@ -42,12 +42,12 @@ def extract_next_links(url, resp):
     
     soup = BeautifulSoup(str_content)
     for tag in soup.findAll('a', href=True):
-        url = tag['href']
-        if "#" in url:
-            fragmentStart = url.index("#") #finds the fragments and gets rid of them
-            url = url[:fragmentStart]
-        if is_valid(url) and correct_path(url) and url not in links_grabbed: 
-            links_grabbed.append(url)
+        curr_url = tag['href']
+        if "#" in curr_url:
+            fragmentStart = curr_url.index("#") #finds the fragments and gets rid of them
+            curr_url = url[:fragmentStart]
+        if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed: 
+            links_grabbed.append(curr_url)
     print(f"number of url: {len(links_grabbed)}")
     return links_grabbed
     
