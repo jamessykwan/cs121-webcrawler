@@ -7,7 +7,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 simhash_vals = []
-
+longest_page_val = 0
+longest_page_url = ''
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -42,6 +43,15 @@ def simhash(soup):                                  # calculate sim hash of curr
     freqs = computeWordFrequencies(tokens)          # calculate frequencies of tokens
     words = list(freqs.keys())                      # extract words(keys) from freqs
     weights = list(freqs.values())                  # extract values from freqs to use as weights
+
+    weight_sum = 0                                  # compute total number of words in page
+    for i in weights:
+        weight_sum += i
+    global longest_page_val                         # track max number of words in a page using global vars
+    global longest_page_url
+    if weight_sum > longest_page_val:
+        longest_page_val = weight_sum
+        longest_page_url = url
 
     for i in range(0, len(words)):                  # hash each word using md5
         temp = hashlib.md5(words[i].encode())       # encode word
