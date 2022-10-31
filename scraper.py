@@ -94,7 +94,7 @@ def simhash(url, contents):                                  # calculate sim has
 
 
 def extract_next_links(url, resp):
-    global simhash_vals,unique_pages
+    global simhash_vals,unique_pages,similar_threshold
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
@@ -114,18 +114,18 @@ def extract_next_links(url, resp):
         if not is_valid(resp.url) or resp.status != 200 or not resp.raw_response.content:
             return links_grabbed
 
-    unique_pages += 1 #count the current one as a unique page if it is valid and 200 status
-    subdomain = url[url.index("www.")+4 :url.index(".uci.edu") + 8]
-    if subdomain in subdomain_count.keys(): #it's in the list, just add to it
-        subdomain_count[subdomain] = subdomain_count[subdomain] +1
-    else:
-        subdomain_count[subdomain] = 1
+        unique_pages += 1 #count the current one as a unique page if it is valid and 200 status
+        subdomain = url[url.index("www.")+4 :url.index(".uci.edu") + 8]
+        if subdomain in subdomain_count.keys(): #it's in the list, just add to it
+            subdomain_count[subdomain] = subdomain_count[subdomain] +1
+        else:
+            subdomain_count[subdomain] = 1
 
-    try:
-        str_content = resp.raw_response.content.decode("utf-8", errors="?")  # decode using utf-8
-    except:
-        print("Error ", resp.raw_response.url)
-        return links_grabbed
+        try:
+            str_content = resp.raw_response.content.decode("utf-8", errors="?")  # decode using utf-8
+        except:
+            print("Error ", resp.raw_response.url)
+            return links_grabbed
 
         soup = BeautifulSoup(str_content)
         raw_contents = soup.get_text()
@@ -136,32 +136,36 @@ def extract_next_links(url, resp):
 
         fingerprint = np.array(simhash(url, raw_contents))             # call simhash function to generate fingerprint of current page
 
-    # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
-    #     return links_grabbed
-    domain = correct_path(url)
-    if domain != '':
-        for vals in simhash_vals[domain]:
-            if similar(fingerprint,vals,1.0):   # compare fingerprint against all other fingerprints in simhash_vals
-                return links_grabbed
-        simhash_vals[domain].append(fingerprint)
-    
-    for tag in soup.findAll('a', href=True):
-        curr_url = tag['href']
-        if curr_url.startswith('/') and not curr_url.startswith(
-                "//"):  # if it expects us to append the domain to the link
-            if "today.uci.edu/department/information_computer_sciences/" in url:
-                domain = url[:url.index("today.uci.edu/department/information_computer_sciences") + 54]
-                curr_url = domain + curr_url
-            else:
-                domain = url[:url.index(".uci.edu") + 8]
-                curr_url = domain + curr_url
-        if "#" in curr_url:
-            fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
-            curr_url = curr_url[:fragmentStart]
-        if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
-            links_grabbed.append(curr_url)
-    print(f"number of url: {len(links_grabbed)} number of fingerprint {sum(len(simhash_vals[k]) for k, v in simhash_vals.items())}")
-    return links_grabbed
+        # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
+        #     return links_grabbed
+        domain = correct_path(url)
+        if domain != '':
+            for vals in simhash_vals[domain]:
+                if similar(fingerprint,vals,similar_threshold):   # compare fingerprint against all other fingerprints in simhash_vals
+                    return links_grabbed
+            simhash_vals[domain].append(fingerprint)
+        
+        for tag in soup.findAll('a', href=True):
+            curr_url = tag['href']
+            if curr_url.startswith('/') and not curr_url.startswith(
+                    "//"):  # if it expects us to append the domain to the link
+                if "today.uci.edu/department/information_computer_sciences/" in url:
+                    domain = url[:url.index("today.uci.edu/department/information_computer_sciences") + 54]
+                    curr_url = domain + curr_url
+                else:
+                    domain = url[:url.index(".uci.edu") + 8]
+                    curr_url = domain + curr_url
+            if "#" in curr_url:
+                fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
+                curr_url = curr_url[:fragmentStart]
+            if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
+                links_grabbed.append(curr_url)
+        print(f"number of url: {len(links_grabbed)} number of fingerprint {sum(len(simhash_vals[k]) for k, v in simhash_vals.items())}")
+        return links_grabbed
+    except:
+        print("EXCEPTION OCCURS...")
+        input()
+        return []
 
 
 
