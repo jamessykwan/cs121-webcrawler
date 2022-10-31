@@ -7,12 +7,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import numpy as np
 from globals import *
-# simhash_vals = {'.ics.uci.edu/': [], '.cs.uci.edu/': [], '.informatics.uci.edu/': [], '.stat.uci.edu/': [], 
-#                'today.uci.edu/department/information_computer_sciences/': []}
-# simhash_vals = []
-# longest_page_val = 0
-# longest_page_url = ''
-# fingerPrint_size = 200
+
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -63,7 +58,9 @@ def simhash(url, contents):                                  # calculate sim has
 
     weight_sum = sum(weights)                                  # compute total number of words in page
 
-    
+    if weight_sum < 150:                # check if number of words in page is < 150
+        return []                       # if < 150, is considered a low-content page, return empty list
+
     if weight_sum > longest_page_val:
         longest_page_val = weight_sum
         longest_page_url = url
@@ -122,6 +119,9 @@ def extract_next_links(url, resp):
         return links_grabbed
 
     fingerprint = np.array(simhash(url, raw_contents))             # call simhash function to generate fingerprint of current page
+
+    if len(fingerprint) == 0:                   # if simhash returns empty list, it is a low-content page
+        return links_grabbed                    # if low content page then return empty list
 
     # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
     #     return links_grabbed
