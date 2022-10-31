@@ -99,10 +99,9 @@ def extract_next_links(url, resp):
 
     soup = BeautifulSoup(str_content)
     fingerprint = simhash(soup)             # call simhash function to generate fingerprint of current page
-    if fingerprint not in simhash_vals:     # if fingerprint not in simhash_vals, add it
-        simhash_vals.append(fingerprint)
-    else:                                   # if fingerprint already in simhash_vals, is a (near) duplicate
+    if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
         return links_grabbed
+                                           # compare fingerprint against all other fingerprints in simhash_vals
     for tag in soup.findAll('a', href=True):
         curr_url = tag['href']
         if curr_url.startswith('/') and not curr_url.startswith(
