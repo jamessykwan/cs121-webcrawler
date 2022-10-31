@@ -46,7 +46,7 @@ def simhash(url, contents):                                  # calculate sim has
 
     tokens = word_tokenize(contents)                # tokenize words in contents
     stop_words = set(stopwords.words('english'))    # download list of stopwords
-    filtered_tokens = [word for word in tokens if word not in stop_words]
+    filtered_tokens = [word.lower() for word in tokens if word not in stop_words and word.isalnum()]
  
     freqs = nltk.FreqDist(filtered_tokens)
     sorted_freqs = sorted(freqs.items(), key=lambda x:x[1],reverse=True) #sort the disk by highest to lowest
@@ -156,7 +156,7 @@ def extract_next_links(url, resp):
         if "#" in curr_url:
             fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
             curr_url = curr_url[:fragmentStart]
-        if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
+        if is_valid(curr_url) and correct_path(curr_url) != '' and curr_url not in links_grabbed:
             links_grabbed.append(curr_url)
     print(f"number of url: {len(links_grabbed)} number of fingerprint {sum(len(simhash_vals[k]) for k, v in simhash_vals.items())}")
     return links_grabbed
