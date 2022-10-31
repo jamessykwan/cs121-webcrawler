@@ -7,3 +7,4 @@ unique_pages = 0
 token_freq = {}
 similar_threshold = 1.0
 min_word_threshold = 100
+subdomain_count = {}
