@@ -5,11 +5,14 @@ import hashlib
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import numpy as np
 
-simhash_vals = {'.ics.uci.edu/': [], '.cs.uci.edu/': [], '.informatics.uci.edu/': [], '.stat.uci.edu/': [], 
-               'today.uci.edu/department/information_computer_sciences/': []}
+# simhash_vals = {'.ics.uci.edu/': [], '.cs.uci.edu/': [], '.informatics.uci.edu/': [], '.stat.uci.edu/': [], 
+#                'today.uci.edu/department/information_computer_sciences/': []}
+simhash_vals = []
 longest_page_val = 0
 longest_page_url = ''
+fingerPrint_size = 200
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -25,57 +28,59 @@ def correct_path(url):
     return False
 
 
+def similar(finger1,finger2,threshold=1.0):
+    assert len(finger1) == len(finger2), f"size doesn't match {len(finger1)},{len(finger2)}"
+    n = len(finger1)
+    count = sum([1 if finger1[i] == finger2[i] else 0 for i in range(n)])
+    return count/n >= 1
+
+
 def simhash(url, soup):                                  # calculate sim hash of current page based on soup
-    if len(soup) == 0:                              # return if soup empty
-        return
-    contents = ''
-
-    for i in soup:                                  # combine contents of all tags in soup into one string
-        contents += i.content
-        contents += ' '
-
-    tokens = word_tokenize(contents)                # tokenize words in contents
-    stop_words = set(stopwords.words('english'))    # download list of stopwords
-
-    for i in tokens:                                # remove stopwords from list of tokens
-        if i in stop_words:
-            tokens.remove(i)
-
-    freqs = computeWordFrequencies(tokens)          # calculate frequencies of tokens
-    words = list(freqs.keys())                      # extract words(keys) from freqs
-    weights = list(freqs.values())                  # extract values from freqs to use as weights
-
-    weight_sum = 0                                  # compute total number of words in page
-    for i in weights:
-        weight_sum += i
     global longest_page_val                         # track max number of words in a page using global vars
     global longest_page_url
+    global fingerPrint_size
+    if len(soup) == 0:                              # return if soup empty
+        return
+
+    contents = soup.get_text()
+    tokens = word_tokenize(contents)                # tokenize words in contents
+    stop_words = set(stopwords.words('english'))    # download list of stopwords
+    filtered_tokens = [word for word in tokens if word not in stop_words]
+ 
+    freqs = nltk.FreqDist(filtered_tokens)
+    sorted_freqs = sorted(freqs.items(), key=lambda x:x[1],reverse=True) #sort the disk by highest to lowest
+    words = [a for a,b in sorted_freqs]                      # extract words(keys) from freqs
+    weights = [b for a,b in sorted_freqs]                  # extract values from freqs to use as weights
+
+    weight_sum = sum(weights)                                  # compute total number of words in page
+
+    
     if weight_sum > longest_page_val:
         longest_page_val = weight_sum
         longest_page_url = url
 
-    for i in range(0, len(words)):                  # hash each word using md5
+    binary_word = []
+    for i in range(len(words)):                  # hash each word using md5
         temp = hashlib.md5(words[i].encode())       # encode word
         temp = temp.hexdigest()                     # convert to hex
-        words[i] = bin(int(temp, 16)).zfill(8)      # convert to binary
+        bin_str = bin(int(temp, 16))[2:] #get rid of '0b'
+        binary_word.append(bin_str.zfill(fingerPrint_size))      # convert to binary
 
-    fingerprint = []
-    for i in range(0, len(words[0])):               # fill fingerprint with 0s
-        fingerprint.append(0)
 
-    for i in range(0, len(words[0])):               # update vector components based on words & weights
+    fingerprint = [0]*fingerPrint_size
+    for i in range(0, len(fingerprint)):               # update vector components based on words & weights
         for j in range(0, len(words)):
-            fingerprint[i] = fingerprint[i] + weights[j] if words[j][i] == 1 else fingerprint[i] - weights[j]
-
+            try:
+                fingerprint[i] = fingerprint[i] + weights[j] if int(binary_word[j][i]) == 1 else fingerprint[i] - weights[j]
+            except:
+                print(words[j])
     for i in range(0, len(fingerprint)):            # generate final fingerprint
-        if fingerprint[i] > 0:                      # set positive values to 1
-            fingerprint[i] = 1
-        else:                                       # set negative values to 0
-            fingerprint[i] = 0
+        fingerprint[i] = 1 if fingerprint[i]>0 else 0
     return fingerprint
 
 
 def extract_next_links(url, resp):
+    global simhash_vals
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
@@ -93,6 +98,7 @@ def extract_next_links(url, resp):
     if not is_valid(resp.url) or resp.status != 200 or not resp.raw_response.content:
         return links_grabbed
 
+
     try:
         str_content = resp.raw_response.content.decode("utf-8", errors="?")  # decode using utf-8
     except:
@@ -101,8 +107,13 @@ def extract_next_links(url, resp):
 
     soup = BeautifulSoup(str_content)
     fingerprint = simhash(url, soup)             # call simhash function to generate fingerprint of current page
-    if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
-        return links_grabbed
+
+    # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
+    #     return links_grabbed
+    for vals in simhash_vals:
+        if similar(fingerprint,vals,1.0):
+            return links_grabbed
+    simhash_vals.append(fingerprint)
                                            # compare fingerprint against all other fingerprints in simhash_vals
     for tag in soup.findAll('a', href=True):
         curr_url = tag['href']
@@ -119,34 +130,11 @@ def extract_next_links(url, resp):
             curr_url = curr_url[:fragmentStart]
         if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
             links_grabbed.append(curr_url)
-    print(f"number of url: {len(links_grabbed)}")
+    print(f"number of url: {len(links_grabbed)} number of fingerprint {len(simhash_vals)}")
     return links_grabbed
 
 
-'''
-old fashion way, work, but still have some issue
-'''
 
-
-# result = []
-# while True:
-#     if cur_index == size-1:               # break if iterator points to end of content
-#         break
-#     index = str_content.find('http', cur_index)    # starting from iterator position, find 'http'
-#     if index == -1:                     # break if 'http' doesn't exist in remainder of content
-#         break
-
-#     curr_str_list = []
-#     while index < size and str_content[index] not in [" ","\n", "\"","'"]: #check for the end of url string
-#         if not str_content[index] == "\\":
-#             curr_str_list.append(str_content[index])
-#         index += 1
-#     curr_str = "".join(curr_str_list)
-#     cur_index += len(curr_str)
-
-#     if is_valid(curr_str) and curr_str not in result: #make sure this url is not duplicated and is valid
-#         result.append(curr_str)
-# return result
 
 def is_valid(url):
     # Decide whether to crawl this url or not.
