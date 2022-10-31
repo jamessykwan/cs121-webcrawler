@@ -6,13 +6,13 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import numpy as np
-
+from globals import *
 # simhash_vals = {'.ics.uci.edu/': [], '.cs.uci.edu/': [], '.informatics.uci.edu/': [], '.stat.uci.edu/': [], 
 #                'today.uci.edu/department/information_computer_sciences/': []}
-simhash_vals = []
-longest_page_val = 0
-longest_page_url = ''
-fingerPrint_size = 200
+# simhash_vals = []
+# longest_page_val = 0
+# longest_page_url = ''
+# fingerPrint_size = 200
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -39,6 +39,7 @@ def simhash(url, soup):                                  # calculate sim hash of
     global longest_page_val                         # track max number of words in a page using global vars
     global longest_page_url
     global fingerPrint_size
+    global token_freq
     if len(soup) == 0:                              # return if soup empty
         return
 
@@ -49,6 +50,14 @@ def simhash(url, soup):                                  # calculate sim hash of
  
     freqs = nltk.FreqDist(filtered_tokens)
     sorted_freqs = sorted(freqs.items(), key=lambda x:x[1],reverse=True) #sort the disk by highest to lowest
+
+    #update the global big token_freq for all pages by adding this freq to it
+    for k,v in sorted_freqs:
+        if k not in token_freq:
+            token_freq[k] = v
+        else:
+            token_freq[k] += v
+
     words = [a for a,b in sorted_freqs]                      # extract words(keys) from freqs
     weights = [b for a,b in sorted_freqs]                  # extract values from freqs to use as weights
 
@@ -80,7 +89,7 @@ def simhash(url, soup):                                  # calculate sim hash of
 
 
 def extract_next_links(url, resp):
-    global simhash_vals
+    global simhash_vals,unique_pages
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
@@ -95,10 +104,11 @@ def extract_next_links(url, resp):
     # check for some basic info, is this valid or not, do we have a content or not
     links_grabbed = []
 
+
     if not is_valid(resp.url) or resp.status != 200 or not resp.raw_response.content:
         return links_grabbed
 
-
+    unique_pages += 1 #count the current one as a unique page if it is valid and 200 status
     try:
         str_content = resp.raw_response.content.decode("utf-8", errors="?")  # decode using utf-8
     except:
