@@ -167,8 +167,9 @@ def extract_next_links(url, resp):
                 links_grabbed.append(curr_url)
         print(f"number of url: {len(links_grabbed)} number of fingerprint {sum(len(simhash_vals[k]) for k, v in simhash_vals.items())}")
         return links_grabbed
-    except:
+    except Exception as e:
         print("EXCEPTION OCCURS...")
+        print(e)
         input()
         return []
 
