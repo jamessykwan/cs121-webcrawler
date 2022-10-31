@@ -71,6 +71,7 @@ def simhash(url, soup):                                  # calculate sim hash of
             fingerprint[i] = 1
         else:                                       # set negative values to 0
             fingerprint[i] = 0
+    return fingerprint
 
 
 def extract_next_links(url, resp):
