@@ -18,6 +18,9 @@ def main(config_file, restart):
     #sorting big token_freq, get top 50
     sorted_freqs = sorted(globals.token_freq.items(), key=lambda x:x[1],reverse=True)
     print(f"Freq dic {sorted_freqs[:50]}")
+    listofsubdomains = [list(subitem) for subitem in globals.subdomain_count.items()]
+    listofsubdomains = sorted(listofsubdomains, key=lambda i:i[0])
+    print(f"list of subdomains and their count: {listofsubdomains}")
 
 
 if __name__ == "__main__":
