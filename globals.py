@@ -1,4 +1,5 @@
-simhash_vals = []
+simhash_vals = {'.ics.uci.edu/': [], '.cs.uci.edu/': [], '.informatics.uci.edu/': [], '.stat.uci.edu/': [], 
+                'today.uci.edu/department/information_computer_sciences/': []}
 longest_page_val = 0
 longest_page_url = ''
 fingerPrint_size = 200

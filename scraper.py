@@ -24,8 +24,8 @@ def correct_path(url):
             r"today.uci.edu/department/information_computer_sciences/"]
     for p in path:
         if url.find(p) != -1:
-            return True
-    return False
+            return p
+    return ''
 
 
 def similar(finger1,finger2,threshold=similar_threshold):
@@ -125,11 +125,13 @@ def extract_next_links(url, resp):
 
     # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
     #     return links_grabbed
-    for vals in simhash_vals:
-        if similar(fingerprint,vals,similar_threshold):
-            return links_grabbed
-    simhash_vals.append(fingerprint)
-                                           # compare fingerprint against all other fingerprints in simhash_vals
+    domain = correct_path(url)
+    if domain != '':
+        for vals in simhash_vals[domain]:
+            if similar(fingerprint,vals,1.0):   # compare fingerprint against all other fingerprints in simhash_vals
+                return links_grabbed
+        simhash_vals[domain].append(fingerprint)
+    
     for tag in soup.findAll('a', href=True):
         curr_url = tag['href']
         if curr_url.startswith('/') and not curr_url.startswith(
@@ -145,7 +147,7 @@ def extract_next_links(url, resp):
             curr_url = curr_url[:fragmentStart]
         if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
             links_grabbed.append(curr_url)
-    print(f"number of url: {len(links_grabbed)} number of fingerprint {len(simhash_vals)}")
+    print(f"number of url: {len(links_grabbed)} number of fingerprint {sum(len(simhash_vals[k]) for k, v in simhash_vals.items())}")
     return links_grabbed
 
 
@@ -169,7 +171,7 @@ def is_valid(url):
         elif "doku.php" in url: #trying to make parsing this particular website and its traps faster
             if "?" in url:
                 return False
-        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url or ("?version=" in url and ur.endswith("?version=1"))):
+        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url or ("?version=" in url and url.endswith("?version=1"))):
             return False #not trap but low info skipped
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
