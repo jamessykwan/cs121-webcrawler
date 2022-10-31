@@ -28,22 +28,22 @@ def correct_path(url):
     return False
 
 
-def similar(finger1,finger2,threshold=1.0):
-    assert len(finger1) == len(finger2), f"size doesn't match {len(finger1)},{len(finger2)}"
-    n = len(finger1)
+def similar(finger1,finger2,threshold=similar_threshold):
+    assert finger1.shape == finger2.shape, f"size doesn't match {finger1.shape},{finger2.shape}"
+    assert threshold >=0 and threshold <= 1.0,f"threshold {threshold} out of range"
+    n = finger1.shape[0]
     count = sum([1 if finger1[i] == finger2[i] else 0 for i in range(n)])
-    return count/n >= 1
+    return count/n >= threshold
 
 
-def simhash(url, soup):                                  # calculate sim hash of current page based on soup
+def simhash(url, contents):                                  # calculate sim hash of current page based on soup
     global longest_page_val                         # track max number of words in a page using global vars
     global longest_page_url
     global fingerPrint_size
     global token_freq
-    if len(soup) == 0:                              # return if soup empty
+    if len(contents) == 0:                              # return if soup empty
         return
 
-    contents = soup.get_text()
     tokens = word_tokenize(contents)                # tokenize words in contents
     stop_words = set(stopwords.words('english'))    # download list of stopwords
     filtered_tokens = [word for word in tokens if word not in stop_words]
@@ -116,12 +116,17 @@ def extract_next_links(url, resp):
         return links_grabbed
 
     soup = BeautifulSoup(str_content)
-    fingerprint = simhash(url, soup)             # call simhash function to generate fingerprint of current page
+    raw_contents = soup.get_text()
+
+    if len(raw_contents) < min_word_threshold:
+        return links_grabbed
+
+    fingerprint = np.array(simhash(url, raw_contents))             # call simhash function to generate fingerprint of current page
 
     # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
     #     return links_grabbed
     for vals in simhash_vals:
-        if similar(fingerprint,vals,1.0):
+        if similar(fingerprint,vals,similar_threshold):
             return links_grabbed
     simhash_vals.append(fingerprint)
                                            # compare fingerprint against all other fingerprints in simhash_vals
