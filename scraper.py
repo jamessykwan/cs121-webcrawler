@@ -33,7 +33,12 @@ def similar(finger1,finger2,threshold=similar_threshold):
     assert threshold >=0 and threshold <= 1.0,f"threshold {threshold} out of range"
     n = finger1.shape[0]
     count = sum([1 if finger1[i] == finger2[i] else 0 for i in range(n)])
-    return count/n >= threshold
+    sim= count/n
+    if sim >= threshold:
+        print(sim)
+        return True
+    else:
+        return False
 
 
 def simhash(url, contents):                                  # calculate sim hash of current page based on soup
@@ -46,7 +51,7 @@ def simhash(url, contents):                                  # calculate sim has
 
     tokens = word_tokenize(contents)                # tokenize words in contents
     stop_words = set(stopwords.words('english'))    # download list of stopwords
-    filtered_tokens = [word for word in tokens if word not in stop_words]
+    filtered_tokens = [word for word in tokens if word not in stop_words and word.isalpha()]
  
     freqs = nltk.FreqDist(filtered_tokens)
     sorted_freqs = sorted(freqs.items(), key=lambda x:x[1],reverse=True) #sort the disk by highest to lowest
@@ -102,51 +107,58 @@ def extract_next_links(url, resp):
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
     # check for some basic info, is this valid or not, do we have a content or not
-    links_grabbed = []
-
-
-    if not is_valid(resp.url) or resp.status != 200 or not resp.raw_response.content:
-        return links_grabbed
-
-    unique_pages += 1 #count the current one as a unique page if it is valid and 200 status
     try:
-        str_content = resp.raw_response.content.decode("utf-8", errors="?")  # decode using utf-8
-    except:
-        print("Error ", resp.raw_response.url)
-        return links_grabbed
+        links_grabbed = []
 
-    soup = BeautifulSoup(str_content)
-    raw_contents = soup.get_text()
 
-    if len(raw_contents) < min_word_threshold:
-        return links_grabbed
-
-    fingerprint = np.array(simhash(url, raw_contents))             # call simhash function to generate fingerprint of current page
-
-    # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
-    #     return links_grabbed
-    for vals in simhash_vals:
-        if similar(fingerprint,vals,similar_threshold):
+        if not is_valid(resp.url) or resp.status != 200 or not resp.raw_response.content:
             return links_grabbed
-    simhash_vals.append(fingerprint)
-                                           # compare fingerprint against all other fingerprints in simhash_vals
-    for tag in soup.findAll('a', href=True):
-        curr_url = tag['href']
-        if curr_url.startswith('/') and not curr_url.startswith(
-                "//"):  # if it expects us to append the domain to the link
-            if "today.uci.edu/department/information_computer_sciences/" in url:
-                domain = url[:url.index("today.uci.edu/department/information_computer_sciences") + 54]
-                curr_url = domain + curr_url
-            else:
-                domain = url[:url.index(".uci.edu") + 8]
-                curr_url = domain + curr_url
-        if "#" in curr_url:
-            fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
-            curr_url = curr_url[:fragmentStart]
-        if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
-            links_grabbed.append(curr_url)
-    print(f"number of url: {len(links_grabbed)} number of fingerprint {len(simhash_vals)}")
-    return links_grabbed
+
+        unique_pages += 1 #count the current one as a unique page if it is valid and 200 status
+        str_content = None
+        try:
+            str_content = resp.raw_response.content.decode("utf-8", errors="?")  # decode using utf-8
+        except:
+            print("Error ", resp.raw_response.url)
+            return links_grabbed
+
+        soup = BeautifulSoup(str_content)
+        raw_contents = soup.get_text()
+
+        if len(raw_contents) < min_word_threshold:
+            print(f"Low page size {len(raw_contents)}")
+            return links_grabbed
+
+        fingerprint = np.array(simhash(url, raw_contents))             # call simhash function to generate fingerprint of current page
+
+        # if fingerprint in simhash_vals:       # if fingerprint already in simhash_vals, is an exact duplicate
+        #     return links_grabbed
+        for vals in simhash_vals:
+            if similar(fingerprint,vals,similar_threshold):
+                return links_grabbed
+        simhash_vals.append(fingerprint)
+                                            # compare fingerprint against all other fingerprints in simhash_vals
+        for tag in soup.findAll('a', href=True):
+            curr_url = tag['href']
+            if curr_url.startswith('/') and not curr_url.startswith(
+                    "//"):  # if it expects us to append the domain to the link
+                if "today.uci.edu/department/information_computer_sciences/" in url:
+                    domain = url[:url.index("today.uci.edu/department/information_computer_sciences") + 54]
+                    curr_url = domain + curr_url
+                else:
+                    domain = url[:url.index(".uci.edu") + 8]
+                    curr_url = domain + curr_url
+            if "#" in curr_url:
+                fragmentStart = curr_url.index("#")  # finds the fragments and gets rid of them
+                curr_url = curr_url[:fragmentStart]
+            if is_valid(curr_url) and correct_path(curr_url) and curr_url not in links_grabbed:
+                links_grabbed.append(curr_url)
+        print(f"number of url: {len(links_grabbed)} number of unique Pages {unique_pages}")
+        return links_grabbed
+    except:
+        print("EXCEPTION OCCURS......")
+        input()
+        return []
 
 
 
@@ -169,7 +181,7 @@ def is_valid(url):
         elif "doku.php" in url: #trying to make parsing this particular website and its traps faster
             if "?" in url:
                 return False
-        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url or ("?version=" in url and ur.endswith("?version=1"))):
+        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url or ("?version=" in url and url.endswith("?version=1"))):
             return False #not trap but low info skipped
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
