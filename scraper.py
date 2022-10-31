@@ -109,7 +109,12 @@ def extract_next_links(url, resp):
         return links_grabbed
 
     unique_pages += 1 #count the current one as a unique page if it is valid and 200 status
-    subdomain = url[url.index("www.")+4 :url.index(".uci.edu") + 8]
+    first_index = 0
+    if("www." in url):
+        first_index = url.index("www.")+4
+    else:
+        first_index = url.index("//") + 2
+    subdomain = url[first_index:url.index(".uci.edu") + 8]
     if subdomain in subdomain_count.keys(): #it's in the list, just add to it
         subdomain_count[subdomain] = subdomain_count[subdomain] +1
     else:
