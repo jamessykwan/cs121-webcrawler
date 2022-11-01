@@ -178,7 +178,7 @@ def is_valid(url):
         elif "doku.php" in url: #trying to make parsing this particular website and its traps faster
             if "?" in url:
                 return False
-        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url or ("?version=" in url and url.endswith("?version=1"))):
+        elif "grape.ics.uci.edu" in url and ("action=diff&version=" in url or "timeline?from" in url or ("?version=" in url and not url.endswith("?version=1"))):
             return False #not trap but low info skipped
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
