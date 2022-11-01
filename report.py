@@ -9,7 +9,7 @@ class Report:
         self.fingerPrint_size = 200
         self.unique_pages = 0
         self.token_freq = {}
-        self.similar_threshold = 0.00
+        self.similar_threshold = 0.90
         self.min_word_threshold = 200
         self.subdomain_count = {}
 
