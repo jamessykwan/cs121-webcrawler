@@ -6,7 +6,6 @@ from utils.config import Config
 from crawler import Crawler
 
 def main(config_file, restart):
-    global longest_page_url,longest_page_val,unique_pages
     cparser = ConfigParser()
     cparser.read(config_file)
     config = Config(cparser)

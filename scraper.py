@@ -42,7 +42,7 @@ def simhash(url, contents,report):                                  # calculate 
 
     tokens = word_tokenize(contents)                # tokenize words in contents
     stop_words = set(stopwords.words('english'))    # download list of stopwords
-    filtered_tokens = [word for word in tokens if word not in stop_words and word.isalpha()]
+    filtered_tokens = [word.lower() for word in tokens if word.lower() not in stop_words and word.isalpha()]
  
     freqs = nltk.FreqDist(filtered_tokens)
     sorted_freqs = sorted(freqs.items(), key=lambda x:x[1],reverse=True) #sort the disk by highest to lowest
