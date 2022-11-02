@@ -1,0 +1,115 @@
+1. Number of unique pages: 6987
+
+2. Max words in a page is 10111 words in this url: https://cml.ics.uci.edu/category/aiml 
+
+3. Top 50 words: (Word, Times appeared)
+	1.  research      30208		26. informatics 8343
+	2.  computer      22305		27. engineering 8068
+	3.  students      17889		28. support 	7920
+	4.  uci 	  17401 	29. projects 	7900
+	5.  information   16442		30. may 	7618
+	6.  policies 	  16011		31. design 	7476
+	7.  news 	  15457		32. courses 	7453
+	8.  school 	  15312		33. university 	7398 
+	9.  bren 	  14612		34. september 	7348
+	10. ics 	  13879		35. new 	7121
+	11. events	  13632		36. sciences 	7094
+	12. science 	  13588		37. ramesh 	7059
+	13. data 	  13050 	38. us 		6944
+	14. student 	  13012		39. systems 	6763
+	15. contact 	  11517		40. learning 	6638
+	16. software 	  11360		41. media 	6581
+	17. graduate 	  11121		42. current 	6497
+	18. faculty   	  10050 	43. year 	6232
+	19. academic 	  9383		44. home 	6000
+	20. donald 	  9054		45. development 5988
+	21. computing 	  8753		46. department 	5863
+	22. undergraduate 8709		47. california 	5823
+	23. people 	  8662 		48. professor 	5725
+	24. course 	  8591		49. past 	5724
+	25. irvine 	  8427		50. october 	5712
+
+
+4. List of subdomains and their count in alphabetical order: 
+	accessibility.ics.uci.edu 	1
+	acoi.ics.uci.edu	 	70
+	aiclub.ics.uci.edu 		1
+	archive.ics.uci.edu		4
+	asterix.ics.uci.edu		7
+	cbcl.ics.uci.edu		21
+	cert.ics.uci.edu		3
+	chenli.ics.uci.edu		9
+	cml.ics.uci.edu			149
+	code.ics.uci.edu		13
+	computableplant.ics.uci.edu	31 
+	cradl.ics.uci.edu		20
+	create.ics.uci.edu		7
+	cwicsocal18.ics.uci.edu		12 
+	cyberclub.ics.uci.edu		15
+	dgillen.ics.uci.edu		23
+	duttgroup.ics.uci.edu		83
+	elms.ics.uci.edu		1
+	emj.ics.uci.edu			42
+	esl.ics.uci.edu			1
+	evoke.ics.uci.edu		4 
+	flamingo.ics.uci.edu		12
+	fr.ics.uci.edu			3
+	futurehealth.ics.uci.edu	122
+	grape.ics.uci.edu		184
+	graphics.ics.uci.edu		4
+	hack.ics.uci.edu		1
+	hai.ics.uci.edu			1
+	helpdesk.ics.uci.edu		2
+	hobbes.ics.uci.edu		1
+	hpi.ics.uci.edu			3
+	hub.ics.uci.edu			2
+	iasl.ics.uci.edu		20
+	ics.uci.edu			2245
+	ieee.ics.uci.edu		1
+	industryshowcase.ics.uci.edu	14
+	informatics.ics.uci.edu		2
+	informatics.mt-live.ics.uci.edu 2
+	intranet.ics.uci.edu		2
+	ipubmed.ics.uci.edu		1
+	isg.ics.uci.edu			180
+	jgarcia.ics.uci.edu		23
+	luci.ics.uci.edu		4
+	malek.ics.uci.edu		1
+	mcs.ics.uci.edu			83
+	mdogucu.ics.uci.edu		1
+	mds.ics.uci.edu			19
+	mhcid.ics.uci.edu		18
+	motifmap.ics.uci.edu		2
+	mse.ics.uci.edu			3	
+	mswe.ics.uci.edu		14
+	mt-live.ics.uci.edu		2
+	nalini.ics.uci.edu		7
+	ngs.ics.uci.edu			1254
+	onboarding.ics.uci.edu		1
+	plrg.ics.uci.edu		16
+	psearch.ics.uci.edu		1
+	radicle.ics.uci.edu		1
+	redmiles.ics.uci.edu		4
+	riscit.ics.uci.edu		1
+	sdcl.ics.uci.edu		137
+	seal.ics.uci.edu		6
+	sli.ics.uci.edu			97
+	stairs.ics.uci.edu		4
+	statconsulting.ics.uci.edu	5
+	student-council.ics.uci.edu	1
+	studentcouncil.ics.uci.edu	21
+	support.ics.uci.edu		7
+	swiki.ics.uci.edu		51
+	tad.ics.uci.edu			3
+	tastier.ics.uci.edu		1
+	tippersweb.ics.uci.edu		4
+	transformativeplay.ics.uci.edu  58
+	tutors.ics.uci.edu		43
+	ugradforms.ics.uci.edu		1
+	unite.ics.uci.edu		10
+	vision.ics.uci.edu		199
+	wearablegames.ics.uci.edu	11
+	wics.ics.uci.edu		267
+	wiki.ics.uci.edu		5
+	www-db.ics.uci.edu		11
+	xtune.ics.uci.edu		1
